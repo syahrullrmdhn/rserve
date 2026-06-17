@@ -1,0 +1,63 @@
+{
+  "name": "rserve",
+  "version": "1.0.0",
+  "description": "Modern local development server manager — Apache, MySQL, Nginx, PostgreSQL, Node.js, PHP, Python, Go, Ruby & Cron Jobs in one app",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "build:mac": "electron-builder --mac",
+    "build:linux": "electron-builder --linux",
+    "build:win": "electron-builder --win"
+  },
+  "build": {
+    "appId": "id.syahrulramadhan.rserve",
+    "productName": "R-Serve",
+    "directories": {
+      "output": "dist"
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["x64", "arm64"]
+        }
+      ],
+      "category": "public.app-category.developer-tools",
+      "icon": "assets/icon.icns"
+    },
+    "linux": {
+      "target": ["AppImage", "deb"],
+      "category": "Development",
+      "icon": "assets/icon.png"
+    },
+    "win": {
+      "target": ["portable", "nsis"],
+      "icon": "assets/icon.ico",
+      "sign": null
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "renderer/**/*",
+      "assets/**/*",
+      "node_modules/**/*"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/syahrullrmdhn/rserve.git"
+  },
+  "author": "Syahrul Ramadhan <syahrulrmdhn.0911@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.0.0"
+  },
+  "dependencies": {}
+}
