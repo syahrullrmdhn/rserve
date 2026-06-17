@@ -32,9 +32,8 @@
       "icon": "assets/icon.png"
     },
     "win": {
-      "target": ["portable", "nsis"],
-      "icon": "assets/icon.ico",
-      "sign": null
+      "target": ["zip"],
+      "icon": "assets/icon.ico"
     },
     "nsis": {
       "oneClick": false,
