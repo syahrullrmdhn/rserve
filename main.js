@@ -33,6 +33,15 @@ const SERVICE_CONFIGS = {
       stopCmd: (ver) => `sudo systemctl stop php${ver}-fpm`,
       statusCmd: (ver) => `systemctl status php${ver}-fpm`,
     },
+    windows: {
+      detectCmd: 'where php 2>nul',
+      versionCmd: (ver) => `php -v`,
+      installCmd: (ver) => `choco install php --version=${ver} -y`,
+      switchCmd: (ver) => `choco upgrade php --version=${ver} -y`,
+      startCmd: (ver) => `echo PHP runs via web server on Windows`,
+      stopCmd: (ver) => `echo PHP runs via web server on Windows`,
+      statusCmd: (ver) => `php -v`,
+    },
   },
   nodejs: {
     name: 'Node.js',
@@ -48,6 +57,12 @@ const SERVICE_CONFIGS = {
       installCmd: (ver) => `brew install node@${ver}`,
       switchCmd: (ver) => `brew unlink node && brew link --force --overwrite node@${ver}`,
     },
+    windows: {
+      detectCmd: 'where node 2>nul',
+      versionCmd: (ver) => `node -v`,
+      installCmd: (ver) => `choco install nodejs --version=${ver} -y`,
+      switchCmd: (ver) => `choco upgrade nodejs --version=${ver} -y`,
+    },
   },
   python: {
     name: 'Python',
@@ -62,6 +77,12 @@ const SERVICE_CONFIGS = {
       versionCmd: (ver) => `python${ver} --version`,
       installCmd: (ver) => `brew install python@${ver}`,
       switchCmd: (ver) => `brew unlink python && brew link --force --overwrite python@${ver}`,
+    },
+    windows: {
+      detectCmd: 'where python 2>nul',
+      versionCmd: (ver) => `python --version`,
+      installCmd: (ver) => `choco install python --version=${ver} -y`,
+      switchCmd: (ver) => `choco upgrade python --version=${ver} -y`,
     },
   },
   mysql: {
@@ -81,6 +102,15 @@ const SERVICE_CONFIGS = {
       stopCmd: (ver) => `brew services stop mysql@${ver}`,
       statusCmd: (ver) => `brew services list | grep mysql@${ver}`,
     },
+    windows: {
+      detectCmd: 'sc query MySQL 2>nul',
+      versionCmd: (ver) => `mysql --version`,
+      installCmd: (ver) => `choco install mysql -y`,
+      switchCmd: (ver) => `choco upgrade mysql -y`,
+      startCmd: (ver) => `net start MySQL`,
+      stopCmd: (ver) => `net stop MySQL`,
+      statusCmd: (ver) => `sc query MySQL`,
+    },
   },
   postgresql: {
     name: 'PostgreSQL',
@@ -99,6 +129,15 @@ const SERVICE_CONFIGS = {
       stopCmd: (ver) => `brew services stop postgresql@${ver}`,
       statusCmd: (ver) => `brew services list | grep postgresql@${ver}`,
     },
+    windows: {
+      detectCmd: 'sc query postgresql 2>nul',
+      versionCmd: (ver) => `psql --version`,
+      installCmd: (ver) => `choco install postgresql -y`,
+      switchCmd: (ver) => `choco upgrade postgresql -y`,
+      startCmd: (ver) => `net start postgresql`,
+      stopCmd: (ver) => `net stop postgresql`,
+      statusCmd: (ver) => `sc query postgresql`,
+    },
   },
   apache: {
     name: 'Apache',
@@ -116,6 +155,14 @@ const SERVICE_CONFIGS = {
       stopCmd: (ver) => `brew services stop httpd`,
       statusCmd: (ver) => `brew services list | grep httpd`,
     },
+    windows: {
+      detectCmd: 'sc query Apache2.4 2>nul',
+      versionCmd: (ver) => `httpd -v`,
+      installCmd: (ver) => `choco install apache-httpd -y`,
+      startCmd: (ver) => `net start Apache2.4`,
+      stopCmd: (ver) => `net stop Apache2.4`,
+      statusCmd: (ver) => `sc query Apache2.4`,
+    },
   },
   nginx: {
     name: 'Nginx',
@@ -132,6 +179,14 @@ const SERVICE_CONFIGS = {
       startCmd: (ver) => `brew services start nginx`,
       stopCmd: (ver) => `brew services stop nginx`,
       statusCmd: (ver) => `brew services list | grep nginx`,
+    },
+    windows: {
+      detectCmd: 'where nginx 2>nul',
+      versionCmd: (ver) => `nginx -v`,
+      installCmd: (ver) => `choco install nginx -y`,
+      startCmd: (ver) => `start nginx`,
+      stopCmd: (ver) => `nginx -s stop`,
+      statusCmd: (ver) => `tasklist | findstr nginx.exe`,
     },
   },
 };
