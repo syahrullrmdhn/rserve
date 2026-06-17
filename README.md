@@ -57,30 +57,38 @@ Built with Electron for cross-platform compatibility. Minimal resource footprint
 
 **Apple Silicon (M1/M2/M3/M4):**
 ```bash
-curl -LO https://github.com/syahrullrmdhn/rserve/releases/download/v1.0.0/R-Serve-1.0.0-arm64-mac.tar.gz
-tar -xzf R-Serve-1.0.0-arm64-mac.tar.gz
+curl -LO https://github.com/syahrullrmdhn/rserve/releases/download/v1.0.2/R-Serve-1.0.2-arm64-mac.zip
+unzip R-Serve-1.0.2-arm64-mac.zip
 mv R-Serve.app /Applications/
+# Remove quarantine flag (required for unsigned apps)
+xattr -cr /Applications/R-Serve.app
 open /Applications/R-Serve.app
 ```
 
 **Intel Mac:**
 ```bash
-curl -LO https://github.com/syahrullrmdhn/rserve/releases/download/v1.0.0/R-Serve-1.0.0-x64-mac.tar.gz
-tar -xzf R-Serve-1.0.0-x64-mac.tar.gz
+curl -LO https://github.com/syahrullrmdhn/rserve/releases/download/v1.0.2/R-Serve-1.0.2-mac.zip
+unzip R-Serve-1.0.2-mac.zip
 mv R-Serve.app /Applications/
+# Remove quarantine flag (required for unsigned apps)
+xattr -cr /Applications/R-Serve.app
 open /Applications/R-Serve.app
 ```
 
 **✅ Native ARM64 support** — no Rosetta needed, optimized for Apple Silicon.
 
+> **⚠️ macOS Security:** If you see "R-Serve is damaged", run `xattr -cr /Applications/R-Serve.app` to remove the quarantine flag.
+
 ### Windows
+
+**Requirements:** [Chocolatey](https://chocolatey.org/install) package manager (for service installation)
 
 ```bash
 # Download
-curl -LO https://github.com/syahrullrmdhn/rserve/releases/download/v1.0.0/R-Serve-1.0.0-win-x64.tar.gz
+curl -LO https://github.com/syahrullrmdhn/rserve/releases/download/v1.0.2/R-Serve-1.0.2-win-x64.tar.gz
 
 # Extract (use 7-Zip, WinRAR, or Windows tar)
-tar -xzf R-Serve-1.0.0-win-x64.tar.gz
+tar -xzf R-Serve-1.0.2-win-x64.tar.gz
 
 # Run
 cd win-unpacked
@@ -92,11 +100,17 @@ R-Serve.exe
 **AppImage (Universal - all distros):**
 ```bash
 # Download
-curl -LO https://github.com/syahrullrmdhn/rserve/releases/download/v1.0.0/R-Serve-1.0.0.AppImage
+curl -LO https://github.com/syahrullrmdhn/rserve/releases/download/v1.0.2/R-Serve-1.0.2.AppImage
 
 # Make executable and run
-chmod +x R-Serve-1.0.0.AppImage
-./R-Serve-1.0.0.AppImage
+chmod +x R-Serve-1.0.2.AppImage
+./R-Serve-1.0.2.AppImage
+```
+
+**Debian/Ubuntu (.deb package):**
+```bash
+curl -LO https://github.com/syahrullrmdhn/rserve/releases/download/v1.0.2/rserve_1.0.2_amd64.deb
+sudo dpkg -i rserve_1.0.2_amd64.deb
 ```
 
 ---
