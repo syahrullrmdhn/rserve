@@ -7,35 +7,132 @@ let mainWindow;
 const services = {};
 
 const SERVICE_CONFIGS = {
-  apache: {
-    name: 'Apache',
-    macOS: { bin: '/usr/sbin/apachectl', startCmd: 'start', stopCmd: 'stop', statusCmd: '-S' },
-    linux: { bin: 'systemctl', startCmd: 'start apache2', stopCmd: 'stop apache2', statusCmd: 'status apache2' },
-    windows: { bin: 'httpd.exe', startCmd: null, stopCmd: null, statusCmd: null },
+  php: {
+    name: 'PHP',
+    type: 'runtime',
+    versions: {
+      macOS: ['8.3', '8.2', '8.1', '8.0', '7.4'],
+      linux: ['8.3', '8.2', '8.1', '8.0', '7.4'],
+      windows: ['8.3', '8.2', '8.1', '8.0', '7.4'],
+    },
+    macOS: {
+      detectCmd: 'brew list --formula | grep "^php@"',
+      versionCmd: (ver) => `php${ver.replace('.', '')} -v`,
+      installCmd: (ver) => `brew install php@${ver}`,
+      switchCmd: (ver) => `brew unlink php && brew link --force --overwrite php@${ver}`,
+      startCmd: (ver) => `brew services start php@${ver}`,
+      stopCmd: (ver) => `brew services stop php@${ver}`,
+      statusCmd: (ver) => `brew services list | grep php@${ver}`,
+    },
+    linux: {
+      detectCmd: 'dpkg -l | grep php | grep -E "php[0-9]\\.[0-9]"',
+      versionCmd: (ver) => `php${ver} -v`,
+      installCmd: (ver) => `sudo apt install -y php${ver}-fpm php${ver}-cli`,
+      switchCmd: (ver) => `sudo update-alternatives --set php /usr/bin/php${ver}`,
+      startCmd: (ver) => `sudo systemctl start php${ver}-fpm`,
+      stopCmd: (ver) => `sudo systemctl stop php${ver}-fpm`,
+      statusCmd: (ver) => `systemctl status php${ver}-fpm`,
+    },
+  },
+  nodejs: {
+    name: 'Node.js',
+    type: 'runtime',
+    versions: {
+      macOS: ['22', '20', '18', '16'],
+      linux: ['22', '20', '18', '16'],
+      windows: ['22', '20', '18', '16'],
+    },
+    macOS: {
+      detectCmd: 'ls -1 /usr/local/Cellar/node/ 2>/dev/null || echo ""',
+      versionCmd: (ver) => `node -v`,
+      installCmd: (ver) => `brew install node@${ver}`,
+      switchCmd: (ver) => `brew unlink node && brew link --force --overwrite node@${ver}`,
+    },
+  },
+  python: {
+    name: 'Python',
+    type: 'runtime',
+    versions: {
+      macOS: ['3.12', '3.11', '3.10', '3.9'],
+      linux: ['3.12', '3.11', '3.10', '3.9'],
+      windows: ['3.12', '3.11', '3.10', '3.9'],
+    },
+    macOS: {
+      detectCmd: 'brew list --formula | grep "^python@"',
+      versionCmd: (ver) => `python${ver} --version`,
+      installCmd: (ver) => `brew install python@${ver}`,
+      switchCmd: (ver) => `brew unlink python && brew link --force --overwrite python@${ver}`,
+    },
   },
   mysql: {
     name: 'MySQL',
-    macOS: { bin: 'brew', startCmd: 'services start mysql', stopCmd: 'services stop mysql', statusCmd: 'services list' },
-    linux: { bin: 'systemctl', startCmd: 'start mysql', stopCmd: 'stop mysql', statusCmd: 'status mysql' },
-    windows: { bin: 'net', startCmd: 'start MySQL', stopCmd: 'stop MySQL', statusCmd: null },
-  },
-  nginx: {
-    name: 'Nginx',
-    macOS: { bin: 'nginx', startCmd: '', stopCmd: '-s stop', statusCmd: '-t' },
-    linux: { bin: 'systemctl', startCmd: 'start nginx', stopCmd: 'stop nginx', statusCmd: 'status nginx' },
-    windows: { bin: 'nginx.exe', startCmd: '', stopCmd: '-s stop', statusCmd: null },
+    type: 'database',
+    versions: {
+      macOS: ['8.0', '5.7'],
+      linux: ['8.0', '5.7'],
+      windows: ['8.0', '5.7'],
+    },
+    macOS: {
+      detectCmd: 'brew list --formula | grep "^mysql"',
+      versionCmd: (ver) => `mysql --version`,
+      installCmd: (ver) => `brew install mysql@${ver}`,
+      switchCmd: (ver) => `brew unlink mysql && brew link --force --overwrite mysql@${ver}`,
+      startCmd: (ver) => `brew services start mysql@${ver}`,
+      stopCmd: (ver) => `brew services stop mysql@${ver}`,
+      statusCmd: (ver) => `brew services list | grep mysql@${ver}`,
+    },
   },
   postgresql: {
     name: 'PostgreSQL',
-    macOS: { bin: 'brew', startCmd: 'services start postgresql@14', stopCmd: 'services stop postgresql@14', statusCmd: 'services list' },
-    linux: { bin: 'systemctl', startCmd: 'start postgresql', stopCmd: 'stop postgresql', statusCmd: 'status postgresql' },
-    windows: { bin: 'net', startCmd: 'start PostgreSQL', stopCmd: 'stop PostgreSQL', statusCmd: null },
+    type: 'database',
+    versions: {
+      macOS: ['16', '15', '14', '13'],
+      linux: ['16', '15', '14', '13'],
+      windows: ['16', '15', '14', '13'],
+    },
+    macOS: {
+      detectCmd: 'brew list --formula | grep "^postgresql@"',
+      versionCmd: (ver) => `psql --version`,
+      installCmd: (ver) => `brew install postgresql@${ver}`,
+      switchCmd: (ver) => `brew unlink postgresql && brew link --force --overwrite postgresql@${ver}`,
+      startCmd: (ver) => `brew services start postgresql@${ver}`,
+      stopCmd: (ver) => `brew services stop postgresql@${ver}`,
+      statusCmd: (ver) => `brew services list | grep postgresql@${ver}`,
+    },
   },
-  php: {
-    name: 'PHP-FPM',
-    macOS: { bin: 'brew', startCmd: 'services start php', stopCmd: 'services stop php', statusCmd: 'services list' },
-    linux: { bin: 'systemctl', startCmd: 'start php-fpm', stopCmd: 'stop php-fpm', statusCmd: 'status php-fpm' },
-    windows: { bin: null, startCmd: null, stopCmd: null, statusCmd: null },
+  apache: {
+    name: 'Apache',
+    type: 'webserver',
+    versions: {
+      macOS: ['2.4'],
+      linux: ['2.4'],
+      windows: ['2.4'],
+    },
+    macOS: {
+      detectCmd: 'which apachectl',
+      versionCmd: (ver) => `apachectl -v`,
+      installCmd: (ver) => `brew install httpd`,
+      startCmd: (ver) => `brew services start httpd`,
+      stopCmd: (ver) => `brew services stop httpd`,
+      statusCmd: (ver) => `brew services list | grep httpd`,
+    },
+  },
+  nginx: {
+    name: 'Nginx',
+    type: 'webserver',
+    versions: {
+      macOS: ['1.25', '1.24'],
+      linux: ['1.25', '1.24'],
+      windows: ['1.25', '1.24'],
+    },
+    macOS: {
+      detectCmd: 'which nginx',
+      versionCmd: (ver) => `nginx -v`,
+      installCmd: (ver) => `brew install nginx`,
+      startCmd: (ver) => `brew services start nginx`,
+      stopCmd: (ver) => `brew services stop nginx`,
+      statusCmd: (ver) => `brew services list | grep nginx`,
+    },
   },
 };
 
@@ -85,7 +182,80 @@ function executeCommand(command, args = []) {
   });
 }
 
-async function getServiceStatus(serviceId) {
+async function detectInstalledVersions(serviceId) {
+  const platform = getPlatform();
+  const config = SERVICE_CONFIGS[serviceId];
+  if (!config || !config[platform]) {
+    return { installed: [], active: null };
+  }
+
+  try {
+    const { detectCmd } = config[platform];
+    const result = await executeCommand(detectCmd, []);
+    
+    // Parse detected versions from output
+    const installed = [];
+    const availableVersions = config.versions[platform] || [];
+    
+    for (const ver of availableVersions) {
+      // Check if version exists in output
+      if (result.stdout.includes(ver) || result.stdout.includes(`@${ver}`)) {
+        installed.push(ver);
+      }
+    }
+
+    // Get active version
+    let active = null;
+    if (config[platform].versionCmd) {
+      try {
+        const versionResult = await executeCommand(config[platform].versionCmd(''), []);
+        // Extract version number from output
+        const match = versionResult.stdout.match(/(\d+\.\d+)/);
+        if (match) active = match[1];
+      } catch (err) {
+        // No active version
+      }
+    }
+
+    return { installed, active, available: availableVersions };
+  } catch (err) {
+    return { installed: [], active: null, available: config.versions[platform] || [] };
+  }
+}
+
+async function installVersion(serviceId, version) {
+  const platform = getPlatform();
+  const config = SERVICE_CONFIGS[serviceId];
+  if (!config || !config[platform] || !config[platform].installCmd) {
+    return { success: false, error: 'Install not supported on this platform' };
+  }
+
+  try {
+    const cmd = config[platform].installCmd(version);
+    await executeCommand(cmd, []);
+    return { success: true };
+  } catch (err) {
+    return { success: false, error: err.stderr || err.error || 'Failed to install' };
+  }
+}
+
+async function switchVersion(serviceId, version) {
+  const platform = getPlatform();
+  const config = SERVICE_CONFIGS[serviceId];
+  if (!config || !config[platform] || !config[platform].switchCmd) {
+    return { success: false, error: 'Version switching not supported' };
+  }
+
+  try {
+    const cmd = config[platform].switchCmd(version);
+    await executeCommand(cmd, []);
+    return { success: true };
+  } catch (err) {
+    return { success: false, error: err.stderr || err.error || 'Failed to switch version' };
+  }
+}
+
+async function getServiceStatus(serviceId, version = null) {
   const platform = getPlatform();
   const config = SERVICE_CONFIGS[serviceId];
   if (!config || !config[platform] || !config[platform].statusCmd) {
@@ -93,9 +263,9 @@ async function getServiceStatus(serviceId) {
   }
 
   try {
-    const { bin, statusCmd } = config[platform];
-    const result = await executeCommand(bin, statusCmd.split(' '));
-    // Simple heuristic: if output contains 'running' or 'active', it's running
+    const { statusCmd } = config[platform];
+    const cmd = typeof statusCmd === 'function' ? statusCmd(version || '') : statusCmd;
+    const result = await executeCommand(cmd, []);
     const running = /running|active|started/i.test(result.stdout);
     return { running, output: result.stdout };
   } catch (err) {
@@ -103,7 +273,7 @@ async function getServiceStatus(serviceId) {
   }
 }
 
-async function startService(serviceId) {
+async function startService(serviceId, version = null) {
   const platform = getPlatform();
   const config = SERVICE_CONFIGS[serviceId];
   if (!config || !config[platform] || !config[platform].startCmd) {
@@ -111,9 +281,9 @@ async function startService(serviceId) {
   }
 
   try {
-    const { bin, startCmd } = config[platform];
-    const args = startCmd ? startCmd.split(' ') : [];
-    await executeCommand(bin, args);
+    const { startCmd } = config[platform];
+    const cmd = typeof startCmd === 'function' ? startCmd(version || '') : startCmd;
+    await executeCommand(cmd, []);
     services[serviceId] = 'running';
     return { success: true };
   } catch (err) {
@@ -121,7 +291,7 @@ async function startService(serviceId) {
   }
 }
 
-async function stopService(serviceId) {
+async function stopService(serviceId, version = null) {
   const platform = getPlatform();
   const config = SERVICE_CONFIGS[serviceId];
   if (!config || !config[platform] || !config[platform].stopCmd) {
@@ -129,9 +299,9 @@ async function stopService(serviceId) {
   }
 
   try {
-    const { bin, stopCmd } = config[platform];
-    const args = stopCmd ? stopCmd.split(' ') : [];
-    await executeCommand(bin, args);
+    const { stopCmd } = config[platform];
+    const cmd = typeof stopCmd === 'function' ? stopCmd(version || '') : stopCmd;
+    await executeCommand(cmd, []);
     services[serviceId] = 'stopped';
     return { success: true };
   } catch (err) {
@@ -142,26 +312,41 @@ async function stopService(serviceId) {
 // IPC handlers
 ipcMain.handle('get-platform', () => getPlatform());
 
-ipcMain.handle('get-service-status', async (_, serviceId) => {
-  return await getServiceStatus(serviceId);
+ipcMain.handle('get-service-status', async (_, serviceId, version) => {
+  return await getServiceStatus(serviceId, version);
 });
 
-ipcMain.handle('start-service', async (_, serviceId) => {
-  return await startService(serviceId);
+ipcMain.handle('start-service', async (_, serviceId, version) => {
+  return await startService(serviceId, version);
 });
 
-ipcMain.handle('stop-service', async (_, serviceId) => {
-  return await stopService(serviceId);
+ipcMain.handle('stop-service', async (_, serviceId, version) => {
+  return await stopService(serviceId, version);
+});
+
+ipcMain.handle('detect-versions', async (_, serviceId) => {
+  return await detectInstalledVersions(serviceId);
+});
+
+ipcMain.handle('install-version', async (_, serviceId, version) => {
+  return await installVersion(serviceId, version);
+});
+
+ipcMain.handle('switch-version', async (_, serviceId, version) => {
+  return await switchVersion(serviceId, version);
 });
 
 ipcMain.handle('get-all-services', async () => {
   const platform = getPlatform();
   const result = {};
   for (const [id, config] of Object.entries(SERVICE_CONFIGS)) {
-    const status = await getServiceStatus(id);
+    const versions = await detectInstalledVersions(id);
+    const status = versions.active ? await getServiceStatus(id, versions.active) : { running: false };
     result[id] = {
       name: config.name,
+      type: config.type,
       supported: !!config[platform],
+      versions: versions,
       running: status.running,
     };
   }

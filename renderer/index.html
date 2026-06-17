@@ -159,6 +159,13 @@
       font-size: 16px;
       font-weight: 600;
     }
+    .service-type {
+      font-size: 11px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 2px;
+    }
     .service-status {
       display: flex;
       align-items: center;
@@ -176,6 +183,46 @@
       border-radius: 50%;
       background: currentColor;
     }
+    .service-version {
+      margin: 12px 0;
+      padding: 12px;
+      background: var(--bg);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    .version-label {
+      font-size: 11px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+    .version-selector {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .version-badge {
+      padding: 4px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      background: transparent;
+      color: var(--text-dim);
+    }
+    .version-badge:hover { background: var(--surface-hover); color: var(--text); }
+    .version-badge.installed { border-color: var(--blue); color: var(--blue); }
+    .version-badge.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .version-badge.not-installed { opacity: 0.6; }
+    .version-info {
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-top: 8px;
+    }
+    .version-info strong { color: var(--accent); }
     .service-actions {
       display: flex;
       gap: 8px;

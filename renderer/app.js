@@ -41,20 +41,61 @@ function renderDashboard() {
   const container = document.getElementById('dashboardServices');
   const html = Object.entries(services).map(([id, service]) => {
     if (!service.supported) return '';
+    
+    const versions = service.versions || { installed: [], active: null, available: [] };
+    const hasInstalled = versions.installed.length > 0;
+    
     return `
       <div class="service-card">
         <div class="service-header">
-          <span class="service-name">${service.name}</span>
+          <div>
+            <div class="service-name">${service.name}</div>
+            <div class="service-type">${service.type || 'service'}</div>
+          </div>
           <div class="service-status ${service.running ? 'running' : 'stopped'}">
             <span class="status-dot"></span>
             ${service.running ? 'Running' : 'Stopped'}
           </div>
         </div>
+        
+        ${hasInstalled ? `
+          <div class="service-version">
+            <div class="version-label">Installed Versions</div>
+            <div class="version-selector">
+              ${versions.available.map(ver => {
+                const installed = versions.installed.includes(ver);
+                const active = ver === versions.active;
+                const className = active ? 'active' : (installed ? 'installed' : 'not-installed');
+                return `<button class="version-badge ${className}" 
+                  onclick="handleVersionClick('${id}', '${ver}', ${installed})"
+                  title="${active ? 'Active' : (installed ? 'Click to switch' : 'Click to install')}"
+                >${ver}${active ? ' ✓' : ''}</button>`;
+              }).join('')}
+            </div>
+            ${versions.active ? `<div class="version-info">Active: <strong>${versions.active}</strong></div>` : ''}
+          </div>
+        ` : `
+          <div class="service-version">
+            <div class="version-label">Available Versions (click to install)</div>
+            <div class="version-selector">
+              ${versions.available.map(ver => 
+                `<button class="version-badge not-installed" 
+                  onclick="installVersion('${id}', '${ver}')"
+                  title="Click to install ${ver}"
+                >${ver}</button>`
+              ).join('')}
+            </div>
+            <div class="version-info">No versions installed yet</div>
+          </div>
+        `}
+        
         <div class="service-actions">
-          <button class="btn btn-start" onclick="startService('${id}')" ${service.running ? 'disabled' : ''}>
+          <button class="btn btn-start" onclick="startService('${id}', '${versions.active || ''}')" 
+            ${!hasInstalled || service.running ? 'disabled' : ''}>
             Start
           </button>
-          <button class="btn btn-stop" onclick="stopService('${id}')" ${!service.running ? 'disabled' : ''}>
+          <button class="btn btn-stop" onclick="stopService('${id}', '${versions.active || ''}')" 
+            ${!service.running ? 'disabled' : ''}>
             Stop
           </button>
         </div>
@@ -67,33 +108,75 @@ function renderDashboard() {
 
 function renderServicesPage() {
   const container = document.getElementById('servicesGrid');
-  const html = Object.entries(services).map(([id, service]) => `
-    <div class="service-card">
-      <div class="service-header">
-        <span class="service-name">${service.name}</span>
-        <div class="service-status ${service.running ? 'running' : 'stopped'}">
-          <span class="status-dot"></span>
-          ${service.running ? 'Running' : 'Stopped'}
+  const html = Object.entries(services).map(([id, service]) => {
+    const versions = service.versions || { installed: [], active: null, available: [] };
+    const hasInstalled = versions.installed.length > 0;
+    
+    return `
+      <div class="service-card">
+        <div class="service-header">
+          <div>
+            <div class="service-name">${service.name}</div>
+            <div class="service-type">${service.type || 'service'}</div>
+          </div>
+          <div class="service-status ${service.running ? 'running' : 'stopped'}">
+            <span class="status-dot"></span>
+            ${service.running ? 'Running' : 'Stopped'}
+          </div>
         </div>
+        
+        ${service.supported ? `
+          ${hasInstalled ? `
+            <div class="service-version">
+              <div class="version-label">Installed Versions</div>
+              <div class="version-selector">
+                ${versions.available.map(ver => {
+                  const installed = versions.installed.includes(ver);
+                  const active = ver === versions.active;
+                  const className = active ? 'active' : (installed ? 'installed' : 'not-installed');
+                  return `<button class="version-badge ${className}" 
+                    onclick="handleVersionClick('${id}', '${ver}', ${installed})"
+                    title="${active ? 'Active' : (installed ? 'Click to switch' : 'Click to install')}"
+                  >${ver}${active ? ' ✓' : ''}</button>`;
+                }).join('')}
+              </div>
+              ${versions.active ? `<div class="version-info">Active: <strong>${versions.active}</strong></div>` : ''}
+            </div>
+          ` : `
+            <div class="service-version">
+              <div class="version-label">Available Versions (click to install)</div>
+              <div class="version-selector">
+                ${versions.available.map(ver => 
+                  `<button class="version-badge not-installed" 
+                    onclick="installVersion('${id}', '${ver}')"
+                    title="Click to install ${ver}"
+                  >${ver}</button>`
+                ).join('')}
+              </div>
+              <div class="version-info">No versions installed yet</div>
+            </div>
+          `}
+          
+          <div class="service-actions">
+            <button class="btn btn-start" onclick="startService('${id}', '${versions.active || ''}')" 
+              ${!hasInstalled || service.running ? 'disabled' : ''}>
+              Start
+            </button>
+            <button class="btn btn-stop" onclick="stopService('${id}', '${versions.active || ''}')" 
+              ${!service.running ? 'disabled' : ''}>
+              Stop
+            </button>
+          </div>
+        ` : '<p style="font-size: 12px; color: var(--text-dim); margin-top: 8px;">Not supported on ' + platform + '</p>'}
       </div>
-      ${service.supported ? `
-        <div class="service-actions">
-          <button class="btn btn-start" onclick="startService('${id}')" ${service.running ? 'disabled' : ''}>
-            Start
-          </button>
-          <button class="btn btn-stop" onclick="stopService('${id}')" ${!service.running ? 'disabled' : ''}>
-            Stop
-          </button>
-        </div>
-      ` : '<p style="font-size: 12px; color: var(--text-dim); margin-top: 8px;">Not supported on ' + platform + '</p>'}
-    </div>
-  `).join('');
+    `;
+  }).join('');
   
   container.innerHTML = html;
 }
 
-async function startService(id) {
-  const result = await window.api.startService(id);
+async function startService(id, version) {
+  const result = await window.api.startService(id, version);
   if (result.success) {
     console.log(`✓ ${services[id].name} started`);
   } else {
@@ -103,8 +186,8 @@ async function startService(id) {
   await loadServices();
 }
 
-async function stopService(id) {
-  const result = await window.api.stopService(id);
+async function stopService(id, version) {
+  const result = await window.api.stopService(id, version);
   if (result.success) {
     console.log(`✓ ${services[id].name} stopped`);
   } else {
@@ -112,6 +195,52 @@ async function stopService(id) {
     alert(`Failed to stop ${services[id].name}\n\n${result.error}`);
   }
   await loadServices();
+}
+
+async function installVersion(serviceId, version) {
+  if (!confirm(`Install ${services[serviceId].name} ${version}?\n\nThis will download and install the selected version.`)) {
+    return;
+  }
+
+  console.log(`Installing ${services[serviceId].name} ${version}...`);
+  const result = await window.api.installVersion(serviceId, version);
+  
+  if (result.success) {
+    console.log(`✓ ${services[serviceId].name} ${version} installed`);
+    alert(`${services[serviceId].name} ${version} installed successfully!`);
+  } else {
+    console.error(`✗ Failed to install ${services[serviceId].name} ${version}:`, result.error);
+    alert(`Failed to install ${services[serviceId].name} ${version}\n\n${result.error}`);
+  }
+  
+  await loadServices();
+}
+
+async function switchVersion(serviceId, version) {
+  if (!confirm(`Switch ${services[serviceId].name} to version ${version}?\n\nThis will make ${version} the active version.`)) {
+    return;
+  }
+
+  console.log(`Switching ${services[serviceId].name} to ${version}...`);
+  const result = await window.api.switchVersion(serviceId, version);
+  
+  if (result.success) {
+    console.log(`✓ ${services[serviceId].name} switched to ${version}`);
+    alert(`${services[serviceId].name} switched to ${version} successfully!`);
+  } else {
+    console.error(`✗ Failed to switch ${services[serviceId].name} to ${version}:`, result.error);
+    alert(`Failed to switch ${services[serviceId].name} to ${version}\n\n${result.error}`);
+  }
+  
+  await loadServices();
+}
+
+async function handleVersionClick(serviceId, version, isInstalled) {
+  if (!isInstalled) {
+    await installVersion(serviceId, version);
+  } else {
+    await switchVersion(serviceId, version);
+  }
 }
 
 // Initialize on load
