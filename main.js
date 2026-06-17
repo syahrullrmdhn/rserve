@@ -363,6 +363,125 @@ ipcMain.handle('window-maximize', () => {
 });
 ipcMain.handle('window-close', () => mainWindow?.close());
 
+// File Browser handlers
+ipcMain.handle('browse-directory', async (_, dirPath) => {
+  const fs = require('fs');
+  const path = require('path');
+  
+  try {
+    const fullPath = dirPath || os.homedir();
+    const items = fs.readdirSync(fullPath, { withFileTypes: true });
+    
+    const files = items.map(item => {
+      const itemPath = path.join(fullPath, item.name);
+      const stats = fs.statSync(itemPath);
+      return {
+        name: item.name,
+        path: itemPath,
+        isDirectory: item.isDirectory(),
+        isFile: item.isFile(),
+        size: item.isFile() ? stats.size : 0,
+        modified: stats.mtime,
+      };
+    });
+    
+    return {
+      success: true,
+      currentPath: fullPath,
+      parent: path.dirname(fullPath),
+      files: files.sort((a, b) => {
+        if (a.isDirectory && !b.isDirectory) return -1;
+        if (!a.isDirectory && b.isDirectory) return 1;
+        return a.name.localeCompare(b.name);
+      }),
+    };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+});
+
+ipcMain.handle('open-file', async (_, filePath) => {
+  const { shell } = require('electron');
+  try {
+    await shell.openPath(filePath);
+    return { success: true };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+});
+
+// Cron Jobs handlers
+ipcMain.handle('get-cron-jobs', async () => {
+  const { execSync } = require('child_process');
+  const platform = getPlatform();
+  
+  try {
+    if (platform === 'macOS' || platform === 'linux') {
+      const output = execSync('crontab -l 2>/dev/null || echo ""', { encoding: 'utf-8' });
+      const lines = output.trim().split('\n').filter(line => line && !line.startsWith('#'));
+      
+      const jobs = lines.map((line, index) => {
+        const parts = line.split(' ');
+        if (parts.length < 6) return null;
+        
+        return {
+          id: index,
+          schedule: parts.slice(0, 5).join(' '),
+          command: parts.slice(5).join(' '),
+          enabled: true,
+        };
+      }).filter(Boolean);
+      
+      return { success: true, jobs };
+    } else {
+      return { success: false, error: 'Cron jobs not supported on Windows yet' };
+    }
+  } catch (err) {
+    return { success: true, jobs: [] }; // Empty crontab is OK
+  }
+});
+
+ipcMain.handle('add-cron-job', async (_, schedule, command) => {
+  const { execSync } = require('child_process');
+  const platform = getPlatform();
+  
+  try {
+    if (platform === 'macOS' || platform === 'linux') {
+      const current = execSync('crontab -l 2>/dev/null || echo ""', { encoding: 'utf-8' });
+      const newCron = current.trim() + '\n' + `${schedule} ${command}\n`;
+      execSync(`echo "${newCron.replace(/"/g, '\\"')}" | crontab -`);
+      return { success: true };
+    } else {
+      return { success: false, error: 'Cron jobs not supported on Windows yet' };
+    }
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+});
+
+ipcMain.handle('delete-cron-job', async (_, jobId) => {
+  const { execSync } = require('child_process');
+  const platform = getPlatform();
+  
+  try {
+    if (platform === 'macOS' || platform === 'linux') {
+      const output = execSync('crontab -l 2>/dev/null || echo ""', { encoding: 'utf-8' });
+      const lines = output.trim().split('\n').filter(line => line && !line.startsWith('#'));
+      lines.splice(jobId, 1);
+      
+      const newCron = lines.join('\n') + '\n';
+      execSync(`echo "${newCron.replace(/"/g, '\\"')}" | crontab -`);
+      return { success: true };
+    } else {
+      return { success: false, error: 'Cron jobs not supported on Windows yet' };
+    }
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+});
+
+
+
 app.whenReady().then(createWindow);
 
 app.on('window-all-closed', () => {
