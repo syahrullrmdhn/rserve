@@ -62,6 +62,8 @@ curl -LO https://github.com/syahrullrmdhn/rserve/releases/latest/download/R-Serv
 brew install --cask rserve
 ```
 
+**✅ Apple Silicon (M1/M2/M3/M4) fully supported** — native ARM64 performance, no Rosetta needed.
+
 ### Windows
 ```bash
 # Download the installer
