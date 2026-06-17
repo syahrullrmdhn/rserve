@@ -54,31 +54,49 @@ Built with Electron for cross-platform compatibility. Minimal resource footprint
 ## 📦 Installation
 
 ### macOS
-```bash
-# Download the DMG installer
-curl -LO https://github.com/syahrullrmdhn/rserve/releases/latest/download/R-Serve-mac-universal.dmg
 
-# Or install via Homebrew (coming soon)
-brew install --cask rserve
+**Apple Silicon (M1/M2/M3/M4):**
+```bash
+curl -LO https://github.com/syahrullrmdhn/rserve/releases/download/v1.0.0/R-Serve-1.0.0-arm64-mac.tar.gz
+tar -xzf R-Serve-1.0.0-arm64-mac.tar.gz
+mv R-Serve.app /Applications/
+open /Applications/R-Serve.app
 ```
 
-**✅ Apple Silicon (M1/M2/M3/M4) fully supported** — native ARM64 performance, no Rosetta needed.
+**Intel Mac:**
+```bash
+curl -LO https://github.com/syahrullrmdhn/rserve/releases/download/v1.0.0/R-Serve-1.0.0-x64-mac.tar.gz
+tar -xzf R-Serve-1.0.0-x64-mac.tar.gz
+mv R-Serve.app /Applications/
+open /Applications/R-Serve.app
+```
+
+**✅ Native ARM64 support** — no Rosetta needed, optimized for Apple Silicon.
 
 ### Windows
+
 ```bash
-# Download the installer
-# Portable EXE or NSIS installer available
-https://github.com/syahrullrmdhn/rserve/releases/latest
+# Download
+curl -LO https://github.com/syahrullrmdhn/rserve/releases/download/v1.0.0/R-Serve-1.0.0-win-x64.tar.gz
+
+# Extract (use 7-Zip, WinRAR, or Windows tar)
+tar -xzf R-Serve-1.0.0-win-x64.tar.gz
+
+# Run
+cd win-unpacked
+R-Serve.exe
 ```
 
 ### Linux
-```bash
-# AppImage (universal)
-chmod +x R-Serve-linux-x86_64.AppImage
-./R-Serve-linux-x86_64.AppImage
 
-# Or install .deb (Debian/Ubuntu)
-sudo dpkg -i rserve_1.0.0_amd64.deb
+**AppImage (Universal - all distros):**
+```bash
+# Download
+curl -LO https://github.com/syahrullrmdhn/rserve/releases/download/v1.0.0/R-Serve-1.0.0.AppImage
+
+# Make executable and run
+chmod +x R-Serve-1.0.0.AppImage
+./R-Serve-1.0.0.AppImage
 ```
 
 ---
