@@ -4,439 +4,187 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'">
-  <title>R-Serve</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    :root {
-      --bg: #0f0f14;
-      --surface: #1a1a24;
-      --surface-hover: #22222e;
-      --border: #2a2a38;
-      --text: #e0e0e8;
-      --text-dim: #8888a0;
-      --accent: #6366f1;
-      --accent-hover: #4f46e5;
-      --green: #10b981;
-      --red: #ef4444;
-      --yellow: #f59e0b;
-      --blue: #3b82f6;
-    }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      height: 100vh;
-      overflow: hidden;
-      user-select: none;
-      -webkit-app-region: drag;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      text-rendering: optimizeLegibility;
-    }
-
-    .titlebar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      height: 40px;
-      padding: 0 16px;
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-    }
-    .titlebar-left {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .titlebar-logo {
-      font-size: 18px;
-      font-weight: 700;
-      background: linear-gradient(135deg, var(--accent), var(--blue));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      letter-spacing: -0.5px;
-    }
-    .titlebar-subtitle {
-      font-size: 11px;
-      color: var(--text-dim);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .titlebar-actions {
-      display: flex;
-      gap: 4px;
-      -webkit-app-region: no-drag;
-    }
-    .titlebar-actions button {
-      width: 32px;
-      height: 28px;
-      border: none;
-      background: transparent;
-      color: var(--text-dim);
-      cursor: pointer;
-      font-size: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 4px;
-      transition: all 0.15s;
-    }
-    .titlebar-actions button:hover { background: var(--border); color: var(--text); }
-    .titlebar-actions .close:hover { background: var(--red); color: #fff; }
-
-    .container {
-      height: calc(100vh - 40px);
-      display: flex;
-      -webkit-app-region: no-drag;
-    }
-
-    .sidebar {
-      width: 240px;
-      background: var(--surface);
-      border-right: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      padding: 16px 0;
-    }
-    .nav-item {
-      padding: 10px 20px;
-      color: var(--text-dim);
-      cursor: pointer;
-      transition: all 0.15s;
-      font-size: 14px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .nav-item:hover { background: var(--surface-hover); color: var(--text); }
-    .nav-item.active { background: var(--accent); color: #fff; font-weight: 500; }
-    .nav-icon { font-size: 16px; }
-
-    .main {
-      flex: 1;
-      overflow-y: auto;
-      padding: 24px;
-    }
-    .main::-webkit-scrollbar { width: 8px; }
-    .main::-webkit-scrollbar-track { background: transparent; }
-    .main::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-
-    .page { display: none; }
-    .page.active { display: block; }
-
-    .page-header {
-      margin-bottom: 24px;
-    }
-    .page-title {
-      font-size: 24px;
-      font-weight: 700;
-      margin-bottom: 4px;
-    }
-    .page-desc {
-      color: var(--text-dim);
-      font-size: 14px;
-    }
-
-    .service-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 16px;
-    }
-    .service-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 20px;
-      transition: all 0.2s;
-    }
-    .service-card:hover { border-color: var(--accent); }
-    .service-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 12px;
-    }
-    .service-name {
-      font-size: 16px;
-      font-weight: 600;
-    }
-    .service-type {
-      font-size: 11px;
-      color: var(--text-dim);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-top: 2px;
-    }
-    .service-status {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 12px;
-      padding: 4px 10px;
-      border-radius: 12px;
-      font-weight: 500;
-    }
-    .service-status.running { background: rgba(16, 185, 129, 0.15); color: var(--green); }
-    .service-status.stopped { background: rgba(136, 136, 160, 0.15); color: var(--text-dim); }
-    .status-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: currentColor;
-    }
-    .service-version {
-      margin: 12px 0;
-      padding: 12px;
-      background: var(--bg);
-      border-radius: 8px;
-      border: 1px solid var(--border);
-    }
-    .version-label {
-      font-size: 11px;
-      color: var(--text-dim);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 8px;
-    }
-    .version-selector {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-    .version-badge {
-      padding: 4px 10px;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.15s;
-      background: transparent;
-      color: var(--text-dim);
-    }
-    .version-badge:hover { background: var(--surface-hover); color: var(--text); }
-    .version-badge.installed { border-color: var(--blue); color: var(--blue); }
-    .version-badge.active { background: var(--accent); border-color: var(--accent); color: #fff; }
-    .version-badge.not-installed { opacity: 0.6; }
-    .version-info {
-      font-size: 12px;
-      color: var(--text-dim);
-      margin-top: 8px;
-    }
-    .version-info strong { color: var(--accent); }
-    .service-actions {
-      display: flex;
-      gap: 8px;
-      margin-top: 16px;
-    }
-    .btn {
-      flex: 1;
-      padding: 8px 16px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      background: transparent;
-      color: var(--text);
-      font-size: 13px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-    .btn:hover { background: var(--surface-hover); }
-    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .btn-start { border-color: var(--green); color: var(--green); }
-    .btn-start:hover { background: var(--green); color: #fff; }
-    .btn-stop { border-color: var(--red); color: var(--red); }
-    .btn-stop:hover { background: var(--red); color: #fff; }
-
-    .info-box {
-      background: rgba(99, 102, 241, 0.1);
-      border: 1px solid rgba(99, 102, 241, 0.3);
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 24px;
-      font-size: 14px;
-      color: var(--text-dim);
-    }
-    .info-box strong { color: var(--accent); }
-
-    .platform-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 12px;
-      background: rgba(99, 102, 241, 0.15);
-      border: 1px solid rgba(99, 102, 241, 0.3);
-      border-radius: 12px;
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--accent);
-    }
-
-    .file-browser {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 20px;
-    }
-    .file-browser-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 16px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid var(--border);
-    }
-    .file-browser-path {
-      flex: 1;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 8px 12px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-family: 'Consolas', monospace;
-    }
-    .file-list {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-    .file-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 10px 12px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-    .file-item:hover { background: var(--surface-hover); }
-    .file-icon { font-size: 18px; }
-    .file-name { flex: 1; font-size: 14px; }
-    .file-size { font-size: 12px; color: var(--text-dim); }
-  </style>
+  <title>R-Serve - Development Server Manager</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="titlebar">
-    <div class="titlebar-left">
-      <span class="titlebar-logo">R-Serve</span>
-      <span class="titlebar-subtitle">Development Server Manager</span>
-    </div>
-    <div class="titlebar-actions">
-      <button onclick="window.api.minimize()" title="Minimize">─</button>
-      <button onclick="window.api.maximize()" title="Maximize">□</button>
-      <button class="close" onclick="window.api.close()" title="Close">✕</button>
-    </div>
-  </div>
-
-  <div class="container">
-    <div class="sidebar">
-      <div class="nav-item active" data-page="dashboard">
-        <span class="nav-icon">🏠</span>
-        Dashboard
+  <div id="app">
+    <!-- Sidebar -->
+    <aside id="sidebar">
+      <div class="logo">
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M12 16v-4"/>
+          <path d="M12 8h.01"/>
+        </svg>
+        R-Serve
       </div>
-      <div class="nav-item" data-page="services">
-        <span class="nav-icon">⚙️</span>
-        Services
-      </div>
-      <div class="nav-item" data-page="files">
-        <span class="nav-icon">📁</span>
-        File Browser
-      </div>
-      <div class="nav-item" data-page="cron">
-        <span class="nav-icon">⏰</span>
-        Cron Jobs
-      </div>
-      <div class="nav-item" data-page="settings">
-        <span class="nav-icon">⚡</span>
-        Settings
-      </div>
-    </div>
-
-    <div class="main">
-      <!-- Dashboard Page -->
-      <div class="page active" id="dashboard">
-        <div class="page-header">
-          <h1 class="page-title">Dashboard</h1>
-          <p class="page-desc">Manage your local development environment</p>
+      
+      <nav>
+        <a href="#" class="nav-link active" data-page="dashboard">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7"/>
+            <rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/>
+            <rect x="3" y="14" width="7" height="7"/>
+          </svg>
+          Dashboard
+        </a>
+        
+        <a href="#" class="nav-link" data-page="services">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="2" width="20" height="8" rx="2" ry="2"/>
+            <rect x="2" y="14" width="20" height="8" rx="2" ry="2"/>
+            <line x1="6" y1="6" x2="6.01" y2="6"/>
+            <line x1="6" y1="18" x2="6.01" y2="18"/>
+          </svg>
+          Services
+        </a>
+        
+        <a href="#" class="nav-link" data-page="files">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/>
+            <polyline points="13 2 13 9 20 9"/>
+          </svg>
+          File Browser
+        </a>
+        
+        <a href="#" class="nav-link" data-page="cron">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+          Cron Jobs
+        </a>
+        
+        <a href="#" class="nav-link" data-page="settings">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M12 1v6m0 6v6M5.64 5.64l4.24 4.24m4.24 4.24l4.24 4.24M1 12h6m6 0h6M5.64 18.36l4.24-4.24m4.24-4.24l4.24-4.24"/>
+          </svg>
+          Settings
+        </a>
+      </nav>
+    </aside>
+    
+    <!-- Main Content -->
+    <main id="main-content">
+      <!-- Header -->
+      <header id="header">
+        <div>
+          <h1 id="page-title">Dashboard</h1>
+          <p id="page-subtitle">Manage your local development environment</p>
         </div>
-
-        <div class="info-box">
-          <strong>Platform:</strong> <span id="platformInfo" class="platform-badge">Loading...</span>
-        </div>
-
-        <div class="service-grid" id="dashboardServices">
-          <!-- Services will be loaded here -->
-        </div>
-      </div>
-
-      <!-- Services Page -->
-      <div class="page" id="services">
-        <div class="page-header">
-          <h1 class="page-title">Services</h1>
-          <p class="page-desc">Start, stop, and monitor all services</p>
-        </div>
-
-        <div class="service-grid" id="servicesGrid">
-          <!-- Services will be loaded here -->
-        </div>
-      </div>
-
-      <!-- File Browser Page -->
-      <div class="page" id="files">
-        <div class="page-header">
-          <h1 class="page-title">File Browser</h1>
-          <p class="page-desc">Browse and manage your project files</p>
-        </div>
-
-        <div class="file-browser">
-          <div class="file-browser-header">
-            <input type="text" class="file-browser-path" value="/usr/local/var/www" readonly>
-            <button class="btn">Open in Finder</button>
-          </div>
-          <div class="file-list">
-            <div class="file-item">
-              <span class="file-icon">📁</span>
-              <span class="file-name">htdocs</span>
-              <span class="file-size">—</span>
-            </div>
-            <div class="file-item">
-              <span class="file-icon">📄</span>
-              <span class="file-name">index.html</span>
-              <span class="file-size">2.4 KB</span>
-            </div>
+        <button class="btn btn-secondary" id="refresh-all">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 4 23 10 17 10"/>
+            <polyline points="1 20 1 14 7 14"/>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+          </svg>
+          Refresh All
+        </button>
+      </header>
+      
+      <!-- Content Area -->
+      <div id="content">
+        <!-- Dashboard Page -->
+        <div id="dashboard-page" class="page active">
+          <div class="services-grid" id="services-container">
+            <!-- Service cards will be dynamically inserted here -->
           </div>
         </div>
+        
+        <!-- Services Page -->
+        <div id="services-page" class="page">
+          <div class="services-grid" id="services-list">
+            <!-- Detailed service list -->
+          </div>
+        </div>
+        
+        <!-- Files Page -->
+        <div id="files-page" class="page">
+          <div class="file-browser">
+            <div class="file-path" id="current-path">~</div>
+            <ul class="file-list" id="file-list">
+              <!-- File items will be dynamically inserted here -->
+            </ul>
+          </div>
+        </div>
+        
+        <!-- Cron Page -->
+        <div id="cron-page" class="page">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h2 style="font-size: 1.5rem; font-weight: 600;">Scheduled Jobs</h2>
+            <button class="btn btn-primary" id="add-cron-btn">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              Add Job
+            </button>
+          </div>
+          <table class="cron-table">
+            <thead>
+              <tr>
+                <th>Schedule</th>
+                <th>Command</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="cron-list">
+              <!-- Cron jobs will be dynamically inserted here -->
+            </tbody>
+          </table>
+        </div>
+        
+        <!-- Settings Page -->
+        <div id="settings-page" class="page">
+          <h2 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 1.5rem;">Settings</h2>
+          <div class="service-card">
+            <h3 style="margin-bottom: 1rem;">About R-Serve</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 0.5rem;">Version: 1.0.2</p>
+            <p style="color: var(--text-secondary); margin-bottom: 0.5rem;">Platform: <span id="platform-info">Loading...</span></p>
+            <p style="color: var(--text-secondary);">Modern local development server manager</p>
+          </div>
+        </div>
       </div>
-
-      <!-- Cron Jobs Page -->
-      <div class="page" id="cron">
-        <div class="page-header">
-          <h1 class="page-title">Cron Jobs</h1>
-          <p class="page-desc">Schedule automated tasks</p>
-        </div>
-
-        <div class="info-box">
-          Coming soon — manage cron jobs directly from R-Serve
-        </div>
-      </div>
-
-      <!-- Settings Page -->
-      <div class="page" id="settings">
-        <div class="page-header">
-          <h1 class="page-title">Settings</h1>
-          <p class="page-desc">Configure R-Serve preferences</p>
-        </div>
-
-        <div class="info-box">
-          Coming soon — customize paths, ports, and auto-start behavior
-        </div>
-      </div>
+    </main>
+  </div>
+  
+  <!-- Alert Modal -->
+  <div id="alert-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+      <h3 id="alert-title">Alert</h3>
+      <pre id="alert-message"></pre>
+      <button class="btn btn-primary" id="close-alert">Close</button>
     </div>
   </div>
-
+  
+  <!-- Add Cron Modal -->
+  <div id="cron-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+      <h3>Add Cron Job</h3>
+      <form id="cron-form" style="margin-top: 1.5rem;">
+        <div style="margin-bottom: 1rem;">
+          <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Schedule</label>
+          <input type="text" id="cron-schedule" placeholder="e.g., 0 * * * *" 
+                 style="width: 100%; padding: 0.625rem; background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius-md); color: var(--text-primary);" required>
+          <small style="color: var(--text-muted); font-size: 0.75rem;">Cron format: minute hour day month weekday</small>
+        </div>
+        <div style="margin-bottom: 1.5rem;">
+          <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Command</label>
+          <input type="text" id="cron-command" placeholder="e.g., /usr/bin/backup.sh" 
+                 style="width: 100%; padding: 0.625rem; background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius-md); color: var(--text-primary);" required>
+        </div>
+        <div style="display: flex; gap: 0.75rem;">
+          <button type="submit" class="btn btn-primary">Add Job</button>
+          <button type="button" class="btn btn-secondary" id="cancel-cron">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  
+  <script src="icons.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

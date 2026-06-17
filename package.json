@@ -20,19 +20,27 @@
       "target": [
         {
           "target": "zip",
-          "arch": ["x64", "arm64"]
+          "arch": [
+            "x64",
+            "arm64"
+          ]
         }
       ],
       "category": "public.app-category.developer-tools",
       "icon": "assets/icon.icns"
     },
     "linux": {
-      "target": ["AppImage", "deb"],
+      "target": [
+        "AppImage",
+        "deb"
+      ],
       "category": "Development",
       "icon": "assets/icon.png"
     },
     "win": {
-      "target": ["zip"],
+      "target": [
+        "zip"
+      ],
       "icon": "assets/icon.ico"
     },
     "nsis": {
@@ -58,5 +66,7 @@
     "electron": "^33.0.0",
     "electron-builder": "^25.0.0"
   },
-  "dependencies": {}
+  "dependencies": {
+    "lucide-static": "^1.20.0"
+  }
 }
