@@ -9,14 +9,22 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey)](https://github.com/syahrullrmdhn/rserve)
 [![Electron](https://img.shields.io/badge/Electron-33.0-47848F?logo=electron)](https://www.electronjs.org/)
+[![Version](https://img.shields.io/badge/version-1.0.3-brightgreen)](https://github.com/syahrullrmdhn/rserve/releases/tag/v1.0.3)
 
 ### *"One App. Every Stack. Zero Hassle."*
 
-[Download for macOS](#) • [Download for Windows](#) • [Download for Linux](#)
+[📦 Download Installer](#-installation) • [Documentation](#-quick-start) • [Features](#-features)
 
-![R-Serve Dashboard](screenshots/dashboard.png)
+---
 
-</div>
+## ✨ What's New in v1.0.3
+
+- 🎨 **Professional UI Redesign** — 24 SVG icons, modern card layouts, smooth animations
+- 📦 **Native Installers** — Bash/Batch scripts with progress bars for all platforms
+- 🔒 **Secure Installation** — Admin checks, checksum verification, automatic shortcuts
+- ✨ **Better UX** — Animated status indicators, responsive design, improved modals
+
+[📋 Full Release Notes](https://github.com/syahrullrmdhn/rserve/blob/main/RELEASE-NOTES-v1.0.3.md)
 
 ---
 
@@ -53,7 +61,82 @@ Built with Electron for cross-platform compatibility. Minimal resource footprint
 
 ## 📦 Installation
 
-### macOS
+### **Professional Installer Packages (Recommended)**
+
+Automated installation with progress bars, security checks, and automatic shortcuts.
+
+#### **macOS**
+
+**Apple Silicon (M1/M2/M3/M4):**
+```bash
+# Download installer package
+curl -LO https://github.com/syahrullrmdhn/rserve/releases/download/v1.0.3/R-Serve-Installer-1.0.3-mac-arm64.tar.gz
+tar -xzf R-Serve-Installer-1.0.3-mac-arm64.tar.gz
+
+# Run installer (requires sudo)
+sudo ./install-mac.sh
+```
+
+**Intel Mac:**
+```bash
+# Download installer package
+curl -LO https://github.com/syahrullrmdhn/rserve/releases/download/v1.0.3/R-Serve-Installer-1.0.3-mac-intel.tar.gz
+tar -xzf R-Serve-Installer-1.0.3-mac-intel.tar.gz
+
+# Run installer (requires sudo)
+sudo ./install-mac.sh
+```
+
+**Features:**
+- ✅ Progress bars with real-time feedback
+- ✅ Automatic quarantine flag removal
+- ✅ Launchpad and Spotlight integration
+- ✅ Installs to `/Applications/R-Serve.app`
+
+#### **Windows**
+
+**Requirements:** [Chocolatey](https://chocolatey.org/install) package manager (for service management)
+
+```bash
+# Download installer package
+curl -LO https://github.com/syahrullrmdhn/rserve/releases/download/v1.0.3/R-Serve-Installer-1.0.3-windows.tar.gz
+
+# Extract
+tar -xzf R-Serve-Installer-1.0.3-windows.tar.gz
+
+# Right-click install-windows.bat → "Run as administrator"
+```
+
+**Features:**
+- ✅ Progress indicators
+- ✅ Start Menu shortcut
+- ✅ Desktop shortcut
+- ✅ Uninstaller included (`C:\Program Files\R-Serve\uninstall.bat`)
+
+#### **Linux**
+
+```bash
+# Download installer package
+curl -LO https://github.com/syahrullrmdhn/rserve/releases/download/v1.0.3/R-Serve-Installer-1.0.3-linux.tar.gz
+tar -xzf R-Serve-Installer-1.0.3-linux.tar.gz
+
+# Run installer (requires sudo)
+sudo ./install-linux.sh
+```
+
+**Features:**
+- ✅ Progress bars
+- ✅ Desktop entry in Application menu
+- ✅ Terminal command: `rserve`
+- ✅ Installs to `/opt/rserve/`
+
+---
+
+### **Portable Builds (Advanced Users)**
+
+For manual installation without installer script:
+
+#### **macOS**
 
 **Apple Silicon (M1/M2/M3/M4):**
 ```bash
@@ -75,13 +158,9 @@ xattr -cr /Applications/R-Serve.app
 open /Applications/R-Serve.app
 ```
 
-**✅ Native ARM64 support** — no Rosetta needed, optimized for Apple Silicon.
-
 > **⚠️ macOS Security:** If you see "R-Serve is damaged", run `xattr -cr /Applications/R-Serve.app` to remove the quarantine flag.
 
-### Windows
-
-**Requirements:** [Chocolatey](https://chocolatey.org/install) package manager (for service installation)
+#### **Windows**
 
 ```bash
 # Download
@@ -95,7 +174,7 @@ cd win-unpacked
 R-Serve.exe
 ```
 
-### Linux
+#### **Linux**
 
 **AppImage (Universal - all distros):**
 ```bash
@@ -106,6 +185,8 @@ curl -LO https://github.com/syahrullrmdhn/rserve/releases/download/v1.0.3/R-Serv
 chmod +x R-Serve-1.0.3.AppImage
 ./R-Serve-1.0.3.AppImage
 ```
+
+**📖 Full Installation Guide:** [INSTALLER-GUIDE.md](https://github.com/syahrullrmdhn/rserve/blob/main/INSTALLER-GUIDE.md)
 
 ---
 
